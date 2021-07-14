@@ -1,0 +1,48 @@
+﻿@model Films.BLL.Models.FilmDto
+
+@{
+    var isInCreateMode = Model.FilmId == 0;
+    var pageTitle = (isInCreateMode) ? ("Create film") : ("Edit film");
+
+    ViewData["Title"] = pageTitle;
+}
+
+<h1>@pageTitle</h1>
+<hr />
+
+
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="EditOrCreate">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="FilmId" />
+
+            <div class="form-group">
+                <label asp-for="FilmDate" class="control-label">Date</label>
+                <input type="date" asp-for="FilmDate" class="form-control" />
+                <span asp-validation-for="FilmDate" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="FilmName" class="control-label">Name</label>
+                <input asp-for="FilmName" class="form-control" />
+                <span asp-validation-for="FilmName" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="FilmDescription" class="control-label">Description</label>
+                <input asp-for="FilmDescription" class="form-control" />
+                <span asp-validation-for="FilmDescription" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Save" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a class="btn btn-secondary" asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

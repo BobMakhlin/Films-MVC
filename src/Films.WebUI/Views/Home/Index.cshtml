@@ -1,0 +1,113 @@
+﻿@model HomeIndexVm
+
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+
+<style>
+    .film__img {
+        height: 300px;
+        object-fit: cover;
+    }
+</style>
+
+<div id="main">
+    <div class="container">
+        <div class="row">
+            @{
+                for (int i = 0; i < Model.Films.Count; i++)
+                {
+                    var item = Model.Films[i];
+
+
+                    var photo = item.Film.Photos.FirstOrDefault() ?? "default.jpg";
+                    var imagePath = $"/files/{photo}";
+
+                    <div class="col-md-6 col-12 mb-5">
+                        <div class="film">
+
+                            <img class="film__img w-100 mb-2" src="@imagePath" alt="" />
+
+                            <div class="text-center">
+                                <h4>@item.Film.FilmName</h4>
+                                <h6>@item.Film.FilmYear year</h6>
+
+                                @{
+                                    if (User.IsInRole("User") || User.IsInRole("Admin"))
+                                    {
+                                        <label class="sr-only" asp-for="Films[i].IsChecked"></label>
+                                        <input asp-for="Films[i].IsChecked" data-film-id="@item.Film.FilmId"
+                                               class="film__checkbox" type="checkbox" />
+                                    }
+                                }
+                            </div>
+                            <hr />
+
+                            <p class="film__description text-justify">@item.Film.FilmDescription</p>
+                            <hr />
+
+                            <h5 class="text-center">Genres</h5>
+                            @string.Join(", ", item.Film.Genres)
+                            <hr />
+
+                            <h5 class="text-center">Actors</h5>
+                            @string.Join(", ", item.Film.Actors)
+                            <hr />
+
+                        </div>
+                    </div>
+
+                }
+            }
+        </div>
+    </div>
+</div>
+
+
+<script>
+    const markFilmUrl = '@Url.Action("MarkFilm")';
+    const unmarkFilmUrl = '@Url.Action("UnmarkFilm")';
+
+    const nMain = document.getElementById('main');
+    const nCheckboxes = document.querySelectorAll('.film__checkbox');
+
+
+    init();
+
+
+    function init() {
+        for (let item of nCheckboxes) {
+            item.addEventListener('change', onCheckboxChanged);
+        }
+    }
+
+    async function onCheckboxChanged(event) {
+        const nTarget = event.target;
+        const filmId = nTarget.dataset.filmId;
+
+
+        const url = (nTarget.checked) ? (markFilmUrl) : (unmarkFilmUrl);
+
+
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: `id=${filmId}`
+        });
+
+
+        switch (response.status) {
+            case 409:
+                alert('Error! You can mark only two films.');
+                nTarget.checked = false;
+                break;
+
+            case 500:
+                alert('Error! Something went wrong...');
+                break;
+        }
+    }
+</script>

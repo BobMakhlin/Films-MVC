@@ -1,0 +1,101 @@
+﻿@model IEnumerable<Films.BLL.Models.FilmDto>
+
+@{
+    ViewData["Title"] = "Films";
+}
+
+<div id="main">
+
+    <h1>Films</h1>
+
+    <p>
+        <a class="btn btn-primary" asp-action="EditOrCreate" asp-route-id="0">Create New</a>
+    </p>
+    <table class="table films-table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Date</th>
+                <th>Name</th>
+                <th>Description</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr class="film-row" data-id="@item.FilmId">
+                    <td>@item.FilmId</td>
+                    <td>@item.FilmDate</td>
+                    <td>@item.FilmName</td>
+                    <td>@item.FilmDescription</td>
+                    <td>
+                        <a class="btn btn-primary" asp-action="EditOrCreate" asp-route-id="@item.FilmId">Edit</a>
+                        <button class="btn btn-danger btn-delete-item">Delete</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+</div>
+
+
+
+@section Scripts {
+    <script>
+        const deleteUrl = '@Url.Action("Delete")';
+
+        const nMain = document.getElementById('main');
+        const nTable = document.querySelector('.films-table');
+
+
+        init();
+
+
+        function init() {
+            nTable.addEventListener('click', onTableClicked);
+        }
+        async function onTableClicked(event) {
+
+            const nTarget = event.target;
+            if (!nTarget.classList.contains('btn-delete-item')) return;
+
+            const nRow = nTarget.closest('.film-row');
+            if (!nRow) return;
+
+            const itemId = nRow.dataset.id;
+            if (!itemId) return;
+
+
+            if (!confirm('Are you sure you want to remove this item?')) return;
+
+
+            const response = await fetch(deleteUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: `id=${itemId}`
+            });
+
+            if (response.ok) {
+                nRow.remove();
+            }
+            else {
+                const alertHtml = `
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                      Sorry, we can't remove this item!
+                      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                      </button>
+                    </div>
+                `;
+
+                nMain.insertAdjacentHTML('beforeend', alertHtml);
+            }
+
+        }
+    </script>
+}
+
